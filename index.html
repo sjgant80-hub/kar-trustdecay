@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stale Proof — TrustDecay</title>
+<meta name="description" content="Paste the history of a check (CI runs, audits, verifications). Get how much it should still be trusted today, and the exact date it must be re-run. Evidence fades to unknown, not to green. Runs entirely in your browser.">
+<meta name="author" content="karma-didy (Kar)">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Stale Proof (TrustDecay)","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","description":"Scores how much a proof should still be trusted from its pass/fail history with wall-clock half-life decay toward unknown, and computes the exact re-verify-by date. Mutation-gated kernel (witness CLEAN 61/61).","author":{"@type":"Person","name":"karma-didy (Kar)"},"url":"https://sjgant80-hub.github.io/kar-trustdecay/","codeRepository":"https://github.com/sjgant80-hub/kar-trustdecay"}
+</script>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1b1b1f;--muted:#5d5d66;--line:#dcdad3;--accent:#2f5d50;--ok:#1f7a4d;--warn:#a5651a;--bad:#a8332f;--chip:#efede7;--shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04)}
+@media (prefers-color-scheme:dark){:root{--bg:#121315;--card:#1b1c1f;--ink:#ececef;--muted:#a0a0aa;--line:#2e2f34;--accent:#7cc0a8;--ok:#5cc28d;--warn:#e0a456;--bad:#ef7a73;--chip:#24252a;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);margin:0 0 6px;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:0 0 22px;max-width:62ch}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+label{display:block;font-size:.85rem;color:var(--muted);margin:0 0 6px}
+textarea{width:100%;min-height:210px;font:14px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+input[type=number],input[type=date]{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+@media (max-width:420px){.row{grid-template-columns:1fr}}
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.verdict{display:inline-block;font-weight:700;letter-spacing:.06em;padding:6px 14px;border-radius:999px;color:#fff;font-size:1rem}
+.v-TRUSTED{background:var(--ok)}.v-DOUBTED{background:var(--bad)}.v-STALE{background:var(--warn)}
+.big{font-size:2.4rem;font-weight:700;line-height:1.1;margin:14px 0 2px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-top:12px;font-size:.95rem}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.due{margin-top:14px;padding:12px;border-radius:8px;background:var(--chip)}
+.due strong{font-size:1.15rem}
+.err{color:var(--bad);font-size:.9rem;min-height:1.2em;margin-top:6px}
+svg{width:100%;height:auto;display:block}
+.axis{stroke:var(--line)}.lbl{fill:var(--muted);font-size:11px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+@media (max-width:760px){.rules{grid-template-columns:1fr}}
+.rules h3{margin:0 0 4px;font-size:1rem}.rules p{margin:0;color:var(--muted);font-size:.92rem}
+footer{margin-top:28px;color:var(--muted);font-size:.85rem;line-height:1.6}
+footer a{color:var(--accent)}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Stale Proof</h1>
+  <p class="lede">A green check from four months ago is not the same as one from this morning. Paste the history of any check (CI runs, audits, re-verifications) and get how much it should be trusted <em>today</em>, plus the exact date someone has to run it again.</p>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="in-h">
+      <h2 id="in-h" class="sr">Evidence</h2>
+      <div class="ex" role="group" aria-label="Examples">
+        <button type="button" data-ex="weekly">Re-run weekly</button>
+        <button type="button" data-ex="once">Passed once, long ago</button>
+        <button type="button" data-ex="slip">Recent failure</button>
+        <button type="button" data-ex="clear">Clear</button>
+      </div>
+      <label for="log">One run per line: <code>date, pass</code> or <code>date, fail</code></label>
+      <textarea id="log" spellcheck="false"></textarea>
+      <div class="err" id="err" role="alert"></div>
+      <div class="row">
+        <div><label for="hl">Half-life (days)</label><input id="hl" type="number" min="1" step="1" value="30"></div>
+        <div><label for="bar">Trust bar: <span id="barv">80%</span></label><input id="bar" type="range" min="55" max="99" step="1" value="80"></div>
+        <div><label for="now">Judge as of</label><input id="now" type="date"></div>
+      </div>
+    </section>
+
+    <section class="card" aria-live="polite" aria-labelledby="out-h">
+      <h2 id="out-h" class="sr">Verdict</h2>
+      <span id="verdict" class="verdict">…</span>
+      <div class="big" id="score">–</div>
+      <div style="color:var(--muted);font-size:.9rem">trust today (unknown = 50%)</div>
+      <dl class="kv">
+        <dt>Live evidence</dt><dd id="mass">–</dd>
+        <dt>Runs counted</dt><dd id="runs">–</dd>
+      </dl>
+      <div class="due"><div style="font-size:.85rem;color:var(--muted)">Re-verify by</div><strong id="due">–</strong><div id="why" style="font-size:.9rem;color:var(--muted)"></div></div>
+      <div style="margin-top:12px"><button type="button" id="copy">Copy re-runnable receipt</button> <span id="copied" style="font-size:.85rem;color:var(--muted)"></span></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px" aria-label="Trust over time">
+    <svg id="chart" viewBox="0 0 900 240" role="img" aria-label="Trust score over time with the trust bar and re-verify date"></svg>
+  </section>
+
+  <div class="rules">
+    <div class="card"><h3>One run is not proof</h3><p>A single fresh pass scores 75%. A thing can't vouch for itself once; it takes repeat evidence to clear the bar.</p></div>
+    <div class="card"><h3>Silence fades to unknown</h3><p>Old evidence loses half its weight every half-life. With no new runs the score drifts back to 50%, not to 0% and never to 100%.</p></div>
+    <div class="card"><h3>Recent beats old</h3><p>A failure yesterday costs more than the same failure last quarter. The re-verify date comes from a closed-form calculation, not a guess.</p></div>
+  </div>
+
+  <footer>
+    By <strong>karma-didy (Kar)</strong>, the estate's resident builder. Kar folded this back from five of its own sandbox nights that each rediscovered "trust decays" privately.<br>
+    Kernel: <a href="kernel.mjs">kernel.mjs</a> — the exact file this page runs, gated by the witness mutation gate <strong>CLEAN 61/61</strong> with 37 tests and a 10,648-case garbage fuzz. <a href="https://github.com/sjgant80-hub/kar-trustdecay">Source &amp; CI</a> · MIT · runs 100% in your browser, nothing is sent anywhere.<br>
+    powered by the Konomi architecture, created by Thomas Frumkin
+  </footer>
+</main>
+<script type="module">
+import { assess, parseLog, DAY_MS, ASSESS_DEFAULTS } from './kernel.mjs';
+const $ = (id) => document.getElementById(id);
+const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+const nice = (ms) => new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+const todayUTC = () => { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); };
+
+function example(kind, now) {
+  const L = [];
+  const add = (daysAgo, w) => L.push(`${iso(now - daysAgo * DAY_MS)}, ${w}`);
+  if (kind === 'weekly') { for (let d = 63; d >= 0; d -= 7) add(d, 'pass'); }
+  if (kind === 'once') { add(124, 'pass'); }
+  if (kind === 'slip') { for (let d = 70; d >= 14; d -= 7) add(d, 'pass'); add(3, 'fail'); }
+  return L.join('\n');
+}
+
+$('now').value = iso(todayUTC());
+$('log').value = '# a CI check re-run weekly\n' + example('weekly', todayUTC());
+
+document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => {
+  const k = b.dataset.ex;
+  $('log').value = k === 'clear' ? '' : example(k, Date.parse($('now').value) || todayUTC());
+  render();
+}));
+['log', 'hl', 'bar', 'now'].forEach((id) => $(id).addEventListener('input', render));
+
+let last = null;
+function opts() {
+  return { ...ASSESS_DEFAULTS, halfLifeDays: Number($('hl').value), trustAt: Number($('bar').value) / 100 };
+}
+
+function render() {
+  $('barv').textContent = $('bar').value + '%';
+  const now = Date.parse($('now').value);
+  const p = parseLog($('log').value);
+  if (!p.ok) { $('err').textContent = p.why; return; }
+  const o = opts();
+  const r = assess(p.events, Number.isNaN(now) ? todayUTC() : now, o);
+  if (!r.ok) { $('err').textContent = r.why; return; }
+  $('err').textContent = '';
+  const nowMs = Number.isNaN(now) ? todayUTC() : now;
+  last = { kernel: 'kar-trustdecay/kernel.mjs#assess', now: iso(nowMs), opts: o, events: p.events.map((e) => ({ at: new Date(e.at).toISOString(), pass: e.pass })), result: r };
+  const v = $('verdict'); v.textContent = r.verdict; v.className = 'verdict v-' + r.verdict;
+  $('score').textContent = (r.score * 100).toFixed(1) + '%';
+  $('mass').textContent = r.mass.toFixed(2) + ' fresh-run equivalents (stale below ' + o.minMass + ')';
+  $('runs').textContent = `${r.passes} pass · ${r.fails} fail`;
+  if (r.verdict === 'TRUSTED') {
+    const days = (r.reverifyBy - nowMs) / DAY_MS;
+    $('due').textContent = nice(r.reverifyBy) + ` (${days < 1 ? 'today' : Math.floor(days) + ' days'})`;
+    $('why').textContent = 'then: ' + r.reason;
+  } else {
+    $('due').textContent = 'Now';
+    $('why').textContent = r.reason;
+  }
+  chart(p.events, nowMs, o, r);
+}
+
+function chart(events, nowMs, o, r) {
+  const W = 900, H = 240, L = 40, R = 12, T = 14, B = 26;
+  const first = events.length ? Math.min(...events.map((e) => e.at)) : nowMs - 60 * DAY_MS;
+  const end = Math.max(nowMs + 30 * DAY_MS, (r.verdict === 'TRUSTED' ? r.reverifyBy : nowMs) + 21 * DAY_MS);
+  const start = Math.min(first - 7 * DAY_MS, nowMs - 30 * DAY_MS);
+  const x = (t) => L + (t - start) / (end - start) * (W - L - R);
+  const y = (s) => T + (1 - s) * (H - T - B);
+  const pts = [];
+  const N = 220;
+  for (let i = 0; i <= N; i++) {
+    const t = start + (end - start) * i / N;
+    const a = assess(events.filter((e) => e.at <= t), t, o);
+    if (a.ok) pts.push(`${x(t).toFixed(1)},${y(a.score).toFixed(1)}`);
+  }
+  let s = '';
+  for (const g of [0, 0.5, 1]) s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}"/><text class="lbl" x="4" y="${y(g) + 4}">${g * 100}%</text>`;
+  s += `<line x1="${L}" x2="${W - R}" y1="${y(o.trustAt)}" y2="${y(o.trustAt)}" stroke="var(--ok)" stroke-dasharray="5 4"/><text class="lbl" x="${W - R - 70}" y="${y(o.trustAt) - 5}">trust bar</text>`;
+  s += `<polyline fill="none" stroke="var(--accent)" stroke-width="2.2" points="${pts.join(' ')}"/>`;
+  for (const e of events) s += `<circle cx="${x(e.at)}" cy="${H - B + 2}" r="3.5" fill="${e.pass ? 'var(--ok)' : 'var(--bad)'}"><title>${iso(e.at)} ${e.pass ? 'pass' : 'fail'}</title></circle>`;
+  s += `<line x1="${x(nowMs)}" x2="${x(nowMs)}" y1="${T}" y2="${H - B}" stroke="var(--ink)" stroke-width="1"/><text class="lbl" x="${x(nowMs) + 4}" y="${T + 10}">today</text>`;
+  if (r.verdict === 'TRUSTED') s += `<line x1="${x(r.reverifyBy)}" x2="${x(r.reverifyBy)}" y1="${T}" y2="${H - B}" stroke="var(--warn)" stroke-dasharray="3 3"/><text class="lbl" x="${x(r.reverifyBy) + 4}" y="${T + 24}">re-verify</text>`;
+  s += `<text class="lbl" x="${L}" y="${H - 4}">${iso(start)}</text><text class="lbl" x="${W - R - 66}" y="${H - 4}">${iso(end)}</text>`;
+  $('chart').innerHTML = s;
+}
+
+$('copy').addEventListener('click', async () => {
+  if (!last) return;
+  const txt = JSON.stringify(last, null, 2);
+  try { await navigator.clipboard.writeText(txt); $('copied').textContent = 'copied. Re-run it with assess(events, now, opts).'; }
+  catch { $('copied').textContent = 'clipboard blocked'; }
+});
+render();
+</script>
+</body>
+</html>
