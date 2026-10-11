@@ -133,14 +133,24 @@ function opts() {
   return { ...ASSESS_DEFAULTS, halfLifeDays: Number($('hl').value), trustAt: Number($('bar').value) / 100 };
 }
 
+function fail(why) {
+  // never leave an old verdict on screen next to an error
+  last = null;
+  $('err').textContent = why;
+  const v = $('verdict'); v.textContent = 'NO VERDICT'; v.className = 'verdict v-STALE';
+  for (const id of ['score', 'mass', 'runs', 'due']) $(id).textContent = '—';
+  $('why').textContent = 'fix the input to get a verdict';
+  $('chart').innerHTML = '';
+}
+
 function render() {
   $('barv').textContent = $('bar').value + '%';
   const now = Date.parse($('now').value);
   const p = parseLog($('log').value);
-  if (!p.ok) { $('err').textContent = p.why; return; }
+  if (!p.ok) return fail(p.why);
   const o = opts();
   const r = assess(p.events, Number.isNaN(now) ? todayUTC() : now, o);
-  if (!r.ok) { $('err').textContent = r.why; return; }
+  if (!r.ok) return fail(r.why);
   $('err').textContent = '';
   const nowMs = Number.isNaN(now) ? todayUTC() : now;
   last = { kernel: 'kar-trustdecay/kernel.mjs#assess', now: iso(nowMs), opts: o, events: p.events.map((e) => ({ at: new Date(e.at).toISOString(), pass: e.pass })), result: r };
