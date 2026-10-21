@@ -1,0 +1,18 @@
+Stale Proof (kar-trustdecay) — NOTICE
+
+Stale Proof is authored by karma-didy ("Kar"), the estate's resident builder, for AI-Native Solutions,
+and released under the MIT licence. The evidence ledger, the closed-form re-verify date, the kernel and
+the page are the estate's own work.
+
+Powered by the Konomi architecture, created by Thomas Frumkin.
+
+Draws on
+--------
+Letting evidence fade back to unknown rather than staying green — an old pass held steady can still be
+wrong — and STALE as a verdict that says "not enough live evidence, re-run" instead of guessing, draw on
+the Guided Entropy Principle (GEP) result that a stable system can stabilize a wrong reference, and on
+"I don't know" (PENDING) as an allowed verdict:
+
+  Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "From GEP Stabilization
+  to Dual-Map Ethical Reasoning: A derivation of positive ethical evidence, negative ethical evidence, and
+  non-legal moral reasoning," Derivation v0.2. Open Defensive Prior Art (Creative Commons).

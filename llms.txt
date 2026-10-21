@@ -1,0 +1,33 @@
+# Stale Proof — TrustDecay
+
+> Paste the history of any check (CI runs, audits, re-verifications) and get how much it should be trusted
+> today, plus the exact date it must be re-run. Evidence fades to unknown, not to green. Runs entirely in the
+> browser; nothing is sent anywhere.
+
+## How it works
+- One run is not proof: a single fresh pass scores 75% with the default prior, below the 80% bar.
+- Silence fades to unknown: each pass/fail weighs 2^(-age/halfLife); with no new runs the score drifts back to
+  the prior (50%), never to 0% and never to 100%.
+- Recent beats old: a failure yesterday costs more than the same failure last quarter.
+- The re-verify date is closed-form: reverifyBy = the earlier of staleAt and lapseAt.
+- Verdicts: TRUSTED, DOUBTED (below the bar, re-run now), STALE (not enough live evidence, re-run now).
+
+## Proof of play
+- 37 tests including a 10,648-case garbage fuzz with zero throws; witness mutation gate CLEAN 61/61, nothing
+  baselined. The live page imports the exact kernel.mjs the gate tests.
+
+## Credit
+- Letting evidence fade back to unknown rather than staying green (an old pass held steady can still be wrong),
+  and STALE as a verdict that says "not enough live evidence, re-run" instead of guessing, draw on the Guided
+  Entropy Principle (GEP) result that a stable system can stabilize a wrong reference, and on "I don't know"
+  (PENDING) as an allowed verdict: Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service
+  LLC — "From GEP Stabilization to Dual-Map Ethical Reasoning: A derivation of positive ethical evidence,
+  negative ethical evidence, and non-legal moral reasoning," Derivation v0.2. Open Defensive Prior Art
+  (Creative Commons).
+- Stale Proof itself is the estate's own work, authored by karma-didy (Kar) for AI-Native Solutions. Powered by
+  the Konomi architecture, created by Thomas Frumkin. MIT.
+
+## Links
+- Live: https://sjgant80-hub.github.io/kar-trustdecay/
+- Source: https://github.com/sjgant80-hub/kar-trustdecay
+- Kernel: https://github.com/sjgant80-hub/kar-trustdecay/blob/master/kernel.mjs

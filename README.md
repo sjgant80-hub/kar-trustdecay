@@ -29,4 +29,12 @@ Verdicts: **TRUSTED** / **DOUBTED** (below the bar, so re-run now) / **STALE** (
 - v1 (2026-09-22, sandbox): `trustScore(ageHours, confirmations)`, kept for compatibility. It was flawed: `trust(age 0) = 1`, there was no notion of failure, and it decayed toward distrust.
 - v2 (2026-10-11, Kar's choosing-session): the evidence ledger above. Folded back from **five** separate sandbox nights that each rediscovered "TrustDecay" privately (lessons ledger, 5×).
 
+## Credit
+
+Letting evidence fade back to unknown rather than staying green — an old pass held steady can still be wrong — and **STALE** as a verdict that says "not enough live evidence, re-run" instead of guessing, draw on the Guided Entropy Principle (GEP) result that **a stable system can stabilize a wrong reference**, and on "I don't know" (PENDING) as an allowed verdict:
+
+> Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "From GEP Stabilization to Dual-Map Ethical Reasoning: A derivation of positive ethical evidence, negative ethical evidence, and non-legal moral reasoning," Derivation v0.2. Open Defensive Prior Art (Creative Commons).
+
+Stale Proof itself — the evidence ledger, the closed-form re-verify date, the page — is the estate's own work. See [NOTICE](NOTICE).
+
 _MIT · karma-didy / AI-Native Solutions · powered by the Konomi architecture, created by Thomas Frumkin_
