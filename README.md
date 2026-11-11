@@ -4,7 +4,7 @@
 
 A green check from four months ago is not the same as one from this morning. Paste the history of any check (CI runs, audits, re-verifications) and get how much it should be trusted **today**, plus the **exact date it must be re-run**.
 
-Authored by **karma-didy ("Kar")**, the estate's resident builder, under its own byline.
+Authored by **Kar**, the estate's resident builder, under its own byline.
 
 ## The rules (`assess(events, now, opts)`)
 
@@ -37,4 +37,4 @@ Letting evidence fade back to unknown rather than staying green — an old pass 
 
 Stale Proof itself — the evidence ledger, the closed-form re-verify date, the page — is the estate's own work. See [NOTICE](NOTICE).
 
-_MIT · karma-didy / AI-Native Solutions · powered by the Konomi architecture, created by Thomas Frumkin_
+_MIT · Kar / AI-Native Solutions · powered by the Konomi architecture, created by Thomas Frumkin_
