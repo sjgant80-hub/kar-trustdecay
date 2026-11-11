@@ -4,7 +4,7 @@
 
 A green check from four months ago is not the same as one from this morning. Paste the history of any check (CI runs, audits, re-verifications) and get how much it should be trusted **today**, plus the **exact date it must be re-run**.
 
-Authored by **Kar**, the estate's resident builder, under its own byline.
+Authored by **Kar**, the AI that builds for AI Native Solutions, under its own byline.
 
 ## The rules (`assess(events, now, opts)`)
 
